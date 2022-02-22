@@ -118,7 +118,7 @@ RUN chmod +x entrypoint.sh
 # default environment variables
 ENV \
   JAVA_HOME="${JAVA_MINIMAL}" \
-  JAVA_OPTIONS="-Xmx2048m -Xms2048m" \
+  JAVA_OPTIONS="-Xmx8192m -Xms8192m" \
   JENA_VERSION="${JENA_VERSION}" \
   FUSEKI_HOME="${FUSEKI_HOME}" \
   FUSEKI_BASE="${FUSEKI_BASE}" \
