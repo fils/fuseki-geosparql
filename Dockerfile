@@ -1,21 +1,20 @@
 # manage tools versions
 ARG ALPINE_VERSION="3.15"
-ARG UBUNTU_VERSION="22.04"
-ARG JENA_VERSION="4.4.0"
-ARG OTEL_VERSION="1.10.1"
+ARG JENA_VERSION="4.5.0"
+ARG OTEL_VERSION="1.14.0"
 
 # configure some paths, names and args
 ARG FUSEKI_HOME="/opt/fuseki"
 ARG FUSEKI_BASE="/fuseki"
 ARG OTEL_JAR="opentelemetry-javaagent.jar"
 ARG JAVA_MINIMAL="/opt/java-minimal"
-ARG JDEPS_EXTRA="jdk.crypto.cryptoki,jdk.crypto.ec"
+ARG JDEPS_EXTRA="jdk.crypto.cryptoki,jdk.crypto.ec,jdk.httpserver"
 
 
 ###########################################################
 # Build Fuseki from sources and include GeoSPARQL support #
 ###########################################################
-FROM --platform=${BUILDPLATFORM} "docker.io/library/maven:3.8.4-openjdk-17-slim" AS builder
+FROM --platform=${BUILDPLATFORM} "docker.io/library/maven:3.8.5-openjdk-18-slim" AS builder
 ARG JENA_VERSION
 ARG OTEL_VERSION
 ARG FUSEKI_HOME
@@ -40,7 +39,7 @@ RUN patch -p1 < enable-geosparql.diff
 WORKDIR /build/jena/jena-fuseki2
 
 # build Fuseki with GeoSPARQL support
-RUN mvn package -Dmaven.javadoc.skip=true
+RUN mvn package -Dmaven.javadoc.skip=true -DskipTests
 RUN unzip "/build/jena/jena-fuseki2/apache-jena-fuseki/target/apache-jena-fuseki-${JENA_VERSION}.zip" \
   && mkdir -p "${FUSEKI_HOME}" \
   && cd "apache-jena-fuseki-${JENA_VERSION}" \
@@ -91,7 +90,9 @@ RUN \
 FROM --platform=${TARGETPLATFORM} "docker.io/library/alpine:${ALPINE_VERSION}"
 
 # install some required dependencies
-RUN apk add --no-cache gettext
+RUN apk add --no-cache \
+  ca-certificates \
+  gettext
 
 ARG JENA_VERSION
 ARG FUSEKI_HOME
